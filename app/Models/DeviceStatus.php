@@ -1,4 +1,5 @@
 <?php
+// app/Models/DeviceStatus.php
 
 namespace App\Models;
 
@@ -11,6 +12,14 @@ class DeviceStatus extends Model
     protected $fillable = [
         'wifi',
         'camera',
-        'bluetooth',
+        'battery_pct',
+        'battery_hours',
+        'gps_active',
+    ];
+
+    protected $casts = [
+        'gps_active'    => 'boolean',
+        'battery_pct'   => 'integer',
+        'battery_hours' => 'integer',
     ];
 }
