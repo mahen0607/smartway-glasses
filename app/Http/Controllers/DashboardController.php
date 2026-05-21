@@ -1,46 +1,38 @@
 <?php
-// app/Http/Controllers/DashboardController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\DeviceStatus;
-use App\Models\GpsLocation;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $device = DeviceStatus::latest()->first();
-        $gps    = GpsLocation::latest()->first();
+        // 1. Ambil data manipulasi dari tabel configs
+        // Jika tabel belum ada atau kosong, pluck akan menghasilkan array kosong
+        try {
+            $configs = DB::table('configs')->pluck('value', 'key');
+        } catch (\Exception $e) {
+            $configs = collect(); // Antisipasi jika tabel belum dibuat
+        }
 
-        return view('dashboard', compact('device', 'gps'));
-    }
+        // 2. Ambil data status kacamata (baterai, dll)
+        $device = DB::table('device_statuses')->latest()->first();
+        
+        // 3. Ambil data GPS asli (opsional, jika ingin ditampilkan)
+        $gps_asli = DB::table('gps_locations')->latest()->first();
 
-    /** GET /api/device/status  – polling dari frontend */
-    public function deviceStatus(): JsonResponse
-    {
-        $d = DeviceStatus::latest()->first();
-
-        return response()->json([
-            'wifi'        => $d?->wifi        ?? 'Connected',
-            'camera'      => $d?->camera      ?? 'Error',
-            'battery_pct' => $d?->battery_pct ?? 50,
+        // 4. Kirim semua variabel ke view dashboard
+        return view('dashboard', [
+            // Variabel Map yang menyebabkan error
+            'lat'    => $configs['map_lat'] ?? '-7.9525', 
+            'lng'    => $configs['map_lng'] ?? '112.6144',
+            'zoom'   => $configs['map_zoom'] ?? '15',
+            
+            // Variabel pendukung lainnya
+            'device' => $device,
+            'gps'    => $gps_asli
         ]);
-    }
-
-    /** POST /api/sensor/toggle – ubah status sensor */
-    public function sensorToggle(Request $request): JsonResponse
-    {
-        $request->validate([
-            'sensor' => 'required|string',
-            'value'  => 'required|boolean',
-        ]);
-
-        // Simpan ke DB jika ada model SensorStatus
-        // SensorStatus::updateOrCreate(['name'=>$request->sensor],['active'=>$request->value]);
-
-        return response()->json(['ok' => true]);
     }
 }

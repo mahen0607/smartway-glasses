@@ -1,253 +1,380 @@
 {{-- resources/views/gps.blade.php --}}
+
 @extends('layouts.app')
 @section('title','GPS Location')
 
 @push('styles')
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
-  .page-heading {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 22px; font-weight: 800; color: var(--gray-800);
-    margin-bottom: 22px;
-  }
 
-  .page-heading svg {
-    width: 22px; height: 22px;
-    color: var(--gray-800);
-  }
+.page-heading{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:24px;
+    font-weight:800;
+    color:#1f2937;
+    margin-bottom:20px;
+}
 
-  /* Map utama */
-  .map-card { padding: 16px; }
+.map-card{
+    padding:18px;
+}
 
-  .map-frame {
-    width: 100%;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid var(--gray-200);
-    background: var(--gray-100);
-    position: relative;
-  }
+.map-wrapper{
+    position:relative;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid #e5e7eb;
+}
 
-  .map-frame iframe {
-    width: 100%; height: 420px;
-    border: none; display: block;
-  }
+#leaflet-map{
+    width:100%;
+    height:500px;
+}
 
-  /* Placeholder jika tidak ada API key */
-  .map-placeholder {
-    width: 100%; height: 420px;
-    background: linear-gradient(135deg, #e0f2fe 0%, #bbf7d0 50%, #d1fae5 100%);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 10px; position: relative; overflow: hidden;
-  }
-  .map-placeholder-roads {
-    position: absolute; inset: 0; opacity: .18;
-    background-image:
-      repeating-linear-gradient(0deg,   transparent, transparent 40px, #334155 40px, #334155 42px),
-      repeating-linear-gradient(90deg,  transparent, transparent 60px, #334155 60px, #334155 62px),
-      repeating-linear-gradient(45deg,  transparent, transparent 80px, #475569 80px, #475569 81px);
-  }
-  .map-pin-wrap { position: relative; z-index: 2; text-align: center; }
-  .map-pin-icon { font-size: 52px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.25)); }
-  .map-pin-label {
-    font-size: 18px; font-weight: 800; color: var(--red-500);
-    text-shadow: 0 1px 3px rgba(255,255,255,.8);
-    margin-top: 4px;
-  }
-  .map-pin-sub { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.live-badge{
+    position:absolute;
+    top:14px;
+    left:60px;
+    z-index:999;
+    background:white;
+    padding:8px 16px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:700;
+    color:#374151;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
 
-  /* Live badge di atas peta */
-  .map-live-badge {
-    position: absolute; top: 14px; left: 14px; z-index: 10;
-    display: flex; align-items: center; gap: 6px;
-    background: white; border-radius: 20px; padding: 5px 12px;
-    font-size: 12px; font-weight: 700; color: var(--gray-700);
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
-  }
-  .live-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--green-500);
-    animation: blink 1.3s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#22c55e;
+    animation:blink 1s infinite;
+}
 
-  /* Info grid bawah peta */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-top: 18px;
-  }
+@keyframes blink{
+    0%{opacity:1}
+    50%{opacity:.3}
+    100%{opacity:1}
+}
 
-  .info-tile {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 14px 16px;
-    text-align: center;
-  }
-  .info-tile-label { font-size: 11px; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
-  .info-tile-value { font-size: 16px; font-weight: 800; color: var(--gray-800); }
-  .info-tile-value.green { color: var(--green-600); }
-  .info-tile-value.red   { color: var(--red-500); }
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:20px;
+}
 
-  /* History tabel */
-  .history-card { margin-top: 18px; }
-  .section-title { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 14px; }
+.info-box{
+    background:#f9fafb;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+}
 
-  .hist-table { width: 100%; border-collapse: collapse; }
-  .hist-table th {
-    text-align: left; font-size: 11px; font-weight: 700;
-    color: var(--gray-400); text-transform: uppercase; letter-spacing: .4px;
-    padding: 0 0 10px; border-bottom: 1px solid var(--gray-100);
-  }
-  .hist-table td {
-    padding: 10px 0; font-size: 13px;
-    border-bottom: 1px solid var(--gray-100); color: var(--gray-700);
-  }
-  .hist-table tr:last-child td { border-bottom: none; }
-  .hist-table td:first-child { font-weight: 600; color: var(--green-600); }
+.label{
+    font-size:12px;
+    font-weight:700;
+    color:#9ca3af;
+    margin-bottom:8px;
+    text-transform:uppercase;
+}
 
-  .badge-mov {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 700;
-  }
-  .badge-mov.bergerak { background: #dbeafe; color: #1d4ed8; }
-  .badge-mov.diam     { background: var(--gray-100); color: var(--gray-500); }
+.value{
+    font-size:20px;
+    font-weight:800;
+    color:#111827;
+}
+
+.history-card{
+    margin-top:22px;
+    padding:20px;
+    overflow-x:auto;
+}
+
+.history-title{
+    font-size:20px;
+    font-weight:700;
+    color:#1f2937;
+    margin-bottom:18px;
+}
+
+/* =========================
+   TABLE STYLE
+========================= */
+
+.hist-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+
+.hist-table thead{
+    background:#f3f4f6;
+}
+
+.hist-table th{
+    padding:16px 20px;
+    text-align:left;
+    font-size:13px;
+    font-weight:700;
+    color:#6b7280;
+    border-bottom:2px solid #e5e7eb;
+}
+
+.hist-table td{
+    padding:16px 20px;
+    font-size:14px;
+    color:#374151;
+    border-bottom:1px solid #f1f5f9;
+}
+
+.hist-table tbody tr:hover{
+    background:#f9fafb;
+    transition:0.2s;
+}
+
+.status-badge{
+    background:#dcfce7;
+    color:#16a34a;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+@media(max-width:900px){
+
+    .info-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .value{
+        font-size:22px;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+
+    #leaflet-map{
+        height:350px;
+    }
+
+}
+
 </style>
+
 @endpush
 
 @section('content')
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <div class="page-heading">
-  <svg width="22" height="22" viewBox="0 0 24 24"
-       fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6z"/>
-    <circle cx="12" cy="8" r="2.5" fill="currentColor" stroke="none"/>
-  </svg>
-  GPS Location
+    <i class="fa-solid fa-location-dot"></i>
+    GPS Realtime Tracking
 </div>
 
-{{-- Peta utama --}}
 <div class="card map-card">
 
-  <div class="map-frame" style="position:relative;">
+    <div class="map-wrapper">
 
-    {{-- Live badge --}}
-    <div class="map-live-badge">
-      <span class="live-dot"></span> GPS Live
+        <div class="live-badge">
+            <span class="dot"></span>
+            LIVE GPS ACTIVE
+        </div>
+
+        <div id="leaflet-map"></div>
+
     </div>
 
-    @if(config('services.google_maps.key'))
-      {{-- Google Maps embed jika ada API key --}}
-      <iframe
-        src="https://www.google.com/maps?q={{ $gps->latitude ?? -7.9525 }},{{ $gps->longitude ?? 112.6144 }}&z=16&output=embed"
-        allowfullscreen loading="lazy">
-      </iframe>
-    @else
-      {{-- Placeholder saat tidak ada API key — pakai OpenStreetMap (gratis) --}}
-      <iframe
-        src="https://www.openstreetmap.org/export/embed.html?bbox=112.6044%2C-7.9625%2C112.6244%2C-7.9425&layer=mapnik&marker=-7.9525%2C112.6144"
-        style="width:100%;height:420px;border:none;"
-        loading="lazy">
-      </iframe>
-    @endif
+    <div class="info-grid">
 
-  </div>
+        <div class="info-box">
+            <div class="label">Latitude</div>
+            <div class="value" id="latitude">
+                {{ $gps->latitude }}
+            </div>
+        </div>
 
-  {{-- Info tiles --}}
-  <div class="info-grid">
-    <div class="info-tile">
-      <div class="info-tile-label">Latitude</div>
-      <div class="info-tile-value" id="val-lat">{{ $gps->latitude ?? '-7.9525' }}°</div>
+        <div class="info-box">
+            <div class="label">Longitude</div>
+            <div class="value" id="longitude">
+                {{ $gps->longitude }}
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="label">Akurasi</div>
+            <div class="value" id="akurasi">
+                {{ $gps->akurasi }}m
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="label">Status</div>
+            <div class="value" id="status" style="color:#16a34a;">
+                {{ $gps->status }}
+            </div>
+        </div>
+
     </div>
-    <div class="info-tile">
-      <div class="info-tile-label">Longitude</div>
-      <div class="info-tile-value" id="val-lng">{{ $gps->longitude ?? '112.6144' }}°</div>
-    </div>
-    <div class="info-tile">
-      <div class="info-tile-label">Akurasi</div>
-      <div class="info-tile-value green" id="val-akurasi">±{{ $gps->akurasi ?? 3 }} m</div>
-    </div>
-    <div class="info-tile">
-      <div class="info-tile-label">Status</div>
-      <div class="info-tile-value green" id="val-status">
-        {{ $gps->status ?? 'Bergerak' }}
-      </div>
-    </div>
-  </div>
 
 </div>
 
-{{-- Riwayat Lokasi --}}
 <div class="card history-card">
-  <div class="section-title">Riwayat Lokasi</div>
-  <table class="hist-table">
-    <thead>
-      <tr>
-        <th>Waktu</th>
-        <th>Latitude</th>
-        <th>Longitude</th>
-        <th>Akurasi</th>
-        <th>Status</th>
-        <th>Alamat</th>
-      </tr>
-    </thead>
-    <tbody id="history-body">
-      @forelse($histories ?? [] as $h)
-        <tr>
-          <td>{{ \Carbon\Carbon::parse($h->created_at)->format('H:i:s') }}</td>
-          <td>{{ $h->latitude }}°</td>
-          <td>{{ $h->longitude }}°</td>
-          <td>±{{ $h->akurasi }} m</td>
-          <td>
-            <span class="badge-mov {{ strtolower($h->status ?? 'bergerak') }}">
-              {{ $h->status ?? 'Bergerak' }}
-            </span>
-          </td>
-          <td>{{ $h->alamat ?? '-' }}</td>
-        </tr>
-      @empty
-        {{-- Data dummy jika tabel masih kosong --}}
-        @foreach([
-          ['14:32:10', '-7.9525', '112.6144', 3, 'bergerak', 'Universitas Brawijaya'],
-          ['14:30:05', '-7.9521', '112.6140', 4, 'bergerak', 'Jl. Veteran, Malang'],
-          ['14:28:00', '-7.9518', '112.6138', 3, 'diam',     'Gerbang UB Malang'],
-          ['14:25:44', '-7.9515', '112.6135', 5, 'bergerak', 'Jl. Kertosari'],
-          ['14:23:30', '-7.9510', '112.6130', 3, 'bergerak', 'Jl. MT Haryono'],
-        ] as $row)
-        <tr>
-          <td>{{ $row[0] }}</td>
-          <td>{{ $row[1] }}°</td>
-          <td>{{ $row[2] }}°</td>
-          <td>±{{ $row[3] }} m</td>
-          <td><span class="badge-mov {{ $row[4] }}">{{ ucfirst($row[4]) }}</span></td>
-          <td>{{ $row[5] }}</td>
-        </tr>
-        @endforeach
-      @endforelse
-    </tbody>
-  </table>
+
+    <div class="history-title">
+        Riwayat GPS
+    </div>
+
+    <table class="hist-table">
+
+        <thead>
+            <tr>
+                <th>Waktu</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        @forelse($histories as $h)
+
+            <tr>
+
+                <td>
+                    {{ \Carbon\Carbon::parse($h->created_at)->format('d M Y H:i:s') }}
+                </td>
+
+                <td>
+                    {{ number_format($h->latitude, 6) }}
+                </td>
+
+                <td>
+                    {{ number_format($h->longitude, 6) }}
+                </td>
+
+                <td>
+                    <span class="status-badge">
+                        {{ $h->status }}
+                    </span>
+                </td>
+
+            </tr>
+
+        @empty
+
+            <tr>
+                <td colspan="4" style="text-align:center;padding:30px;">
+                    Tidak ada data GPS
+                </td>
+            </tr>
+
+        @endforelse
+
+        </tbody>
+
+    </table>
+
 </div>
 
 @endsection
 
 @push('scripts')
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-// Polling GPS realtime setiap 5 detik
-function pollGps() {
-  fetch('{{ route("api.gps.realtime") }}', {
-    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.latitude)  document.getElementById('val-lat').textContent    = d.latitude + '°';
-    if (d.longitude) document.getElementById('val-lng').textContent    = d.longitude + '°';
-    if (d.akurasi)   document.getElementById('val-akurasi').textContent = '±' + d.akurasi + ' m';
-    if (d.status)    document.getElementById('val-status').textContent  = d.status;
-  })
-  .catch(() => {});
+
+let lat = {{ $gps->latitude }};
+let lng = {{ $gps->longitude }};
+
+// =============================
+// INIT MAP
+// =============================
+
+const map = L.map('leaflet-map').setView([lat, lng], 18);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap'
+}).addTo(map);
+
+// =============================
+// MARKER
+// =============================
+
+const marker = L.marker([lat, lng]).addTo(map);
+
+marker.bindPopup("SmartWay GPS Tracking").openPopup();
+
+// =============================
+// REALTIME FETCH
+// =============================
+
+async function loadRealtimeGPS(){
+
+    try{
+
+        const response = await fetch('/api/gps/realtime');
+
+        const data = await response.json();
+
+        if(data.success){
+
+            const newLat = parseFloat(data.latitude);
+            const newLng = parseFloat(data.longitude);
+
+            // update marker
+            marker.setLatLng([newLat, newLng]);
+
+            // auto move map
+            map.panTo([newLat, newLng]);
+
+            // update info box
+            document.getElementById('latitude').innerHTML =
+                newLat.toFixed(6);
+
+            document.getElementById('longitude').innerHTML =
+                newLng.toFixed(6);
+
+            document.getElementById('akurasi').innerHTML =
+                data.akurasi + 'm';
+
+            document.getElementById('status').innerHTML =
+                data.status;
+
+        }
+
+    }catch(err){
+
+        console.log("GPS ERROR:", err);
+
+    }
+
 }
-setInterval(pollGps, 5000);
+
+// refresh realtime tiap 2 detik
+setInterval(loadRealtimeGPS, 2000);
+
 </script>
+
 @endpush

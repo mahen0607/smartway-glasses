@@ -1,43 +1,67 @@
 <?php
-// app/Http/Controllers/GpsController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\GpsLocation;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GpsController extends Controller
 {
+    /**
+     * Halaman GPS
+     */
     public function index()
     {
-        // Koordinat terbaru
-        $gps = GpsLocation::latest()->first();
+        // Ambil GPS terbaru dari database
+        $latest = DB::table('gps_locations')
+            ->orderBy('id', 'desc')
+            ->first();
 
-        // Riwayat 10 lokasi terakhir hari ini
-        $histories = GpsLocation::whereDate('created_at', today())
-                        ->latest()
-                        ->limit(10)
-                        ->get();
+        // Jika belum ada data
+        if (!$latest) {
+            $latest = (object)[
+                'latitude' => -7.9525,
+                'longitude' => 112.6144,
+                'akurasi' => 5,
+                'status' => 'Offline',
+                'created_at' => now()
+            ];
+        }
 
-        return view('gps', compact('gps', 'histories'));
+        // Riwayat GPS
+        $histories = DB::table('gps_locations')
+            ->orderBy('id', 'desc')
+            ->take(20)
+            ->get();
+
+        return view('gps', [
+            'gps' => $latest,
+            'histories' => $histories
+        ]);
     }
 
     /**
-     * GET /api/gps/realtime
-     * Dipanggil JS setiap 5 detik
+     * API realtime untuk Leaflet
      */
-    public function realtime(): JsonResponse
+    public function getRealtime()
     {
-        $g = GpsLocation::latest()->first();
+        $latest = DB::table('gps_locations')
+            ->orderBy('id', 'desc')
+            ->first();
 
-        if (!$g) return response()->json([]);
+        if (!$latest) {
+            return response()->json([
+                'success' => false
+            ]);
+        }
 
         return response()->json([
-            'latitude'  => $g->latitude,
-            'longitude' => $g->longitude,
-            'akurasi'   => $g->akurasi,
-            'status'    => $g->status ?? 'Bergerak',
-            'alamat'    => $g->alamat,
+            'success'   => true,
+            'latitude'  => (float)$latest->latitude,
+            'longitude' => (float)$latest->longitude,
+            'akurasi'   => $latest->akurasi ?? 0,
+            'status'    => $latest->status ?? 'Aktif',
+            'updated_at'=> $latest->created_at
         ]);
     }
 }

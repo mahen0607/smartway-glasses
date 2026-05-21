@@ -151,13 +151,7 @@
     {{-- Total Deteksi Halangan --}}
     <div class="card stat-card">
       <div class="stat-icon green">
-        {{-- Shield + centang --}}
-        <svg width="22" height="22" viewBox="0 0 24 24"
-             fill="none"
-             stroke="white"
-             stroke-width="2"
-             stroke-linecap="round"
-             stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2L4 6v5c0 5.25 3.5 9.74 8 11 4.5-1.26 8-5.75 8-11V6L12 2z"/>
           <polyline points="9 12 11 14 15 10"/>
         </svg>
@@ -172,13 +166,7 @@
     {{-- Durasi Pemakaian --}}
     <div class="card stat-card">
       <div class="stat-icon lime">
-        {{-- Clock --}}
-        <svg width="22" height="22" viewBox="0 0 24 24"
-             fill="none"
-             stroke="white"
-             stroke-width="2"
-             stroke-linecap="round"
-             stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
         </svg>
@@ -192,17 +180,10 @@
     {{-- Baterai --}}
     <div class="card stat-card">
       <div class="stat-icon gray">
-        {{-- Battery: pakai inline SVG sederhana tanpa rect dalam --}}
         <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-          {{-- body --}}
-          <rect x="1" y="7" width="19" height="12" rx="2" ry="2"
-                fill="none" stroke="#9ca3af" stroke-width="2"/>
-          {{-- terminal kanan --}}
-          <rect x="20" y="10" width="3" height="6" rx="1"
-                fill="#9ca3af" stroke="none"/>
-          {{-- isi baterai ~50% --}}
-          <rect x="3" y="9" width="8" height="8" rx="1"
-                fill="#9ca3af" stroke="none"/>
+          <rect x="1" y="7" width="19" height="12" rx="2" ry="2" fill="none" stroke="#9ca3af" stroke-width="2"/>
+          <rect x="20" y="10" width="3" height="6" rx="1" fill="#9ca3af" stroke="none"/>
+          <rect x="3" y="9" width="8" height="8" rx="1" fill="#9ca3af" stroke="none"/>
         </svg>
       </div>
       <div class="stat-info">
@@ -215,13 +196,7 @@
     {{-- Wifi --}}
     <div class="card stat-card">
       <div class="stat-icon teal">
-        {{-- Wifi --}}
-        <svg width="22" height="22" viewBox="0 0 24 24"
-             fill="none"
-             stroke="#16a34a"
-             stroke-width="2"
-             stroke-linecap="round"
-             stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
           <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
           <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
@@ -239,7 +214,6 @@
 
 {{-- MID: Sensor Jarak + GPS --}}
 <div class="grid-mid">
-
   <div class="card">
     <div class="section-title">Sensor jarak</div>
     <table class="info-table">
@@ -266,22 +240,21 @@
     <table class="info-table">
       <tr>
         <td>Lat</td>
-        <td id="val-lat">{{ $gps->latitude ?? '-7.8123' }}</td>
+        <td id="val-lat">{{ $gps->latitude ?? '-7.9684108°' }}</td>
       </tr>
       <tr>
         <td>Long</td>
-        <td id="val-lng">{{ $gps->longitude ?? '112.0234' }}</td>
+        <td id="val-lng">{{ $gps->longitude ?? '112.5926341°' }}</td>
       </tr>
       <tr>
         <td>Status</td>
         <td>
           <span class="live-dot"></span>
-          <span class="badge bergerak" id="val-gpsstatus">{{ $gps->status ?? 'bergerak' }}</span>
+          <span class="badge diam" id="val-gpsstatus">{{ $gps->status ?? 'diam' }}</span>
         </td>
       </tr>
     </table>
   </div>
-
 </div>
 
 {{-- Log Perjalanan --}}
@@ -296,8 +269,6 @@
       </li>
     @empty
       <li class="log-item"><span class="log-time">14:32</span><span class="log-arrow">→</span><span class="log-desc">Objek dekat (depan)</span></li>
-      <li class="log-item"><span class="log-time">14:31</span><span class="log-arrow">→</span><span class="log-desc">Objek dekat (depan)</span></li>
-      <li class="log-item"><span class="log-time">14:30</span><span class="log-arrow">→</span><span class="log-desc">Objek dekat (depan)</span></li>
     @endforelse
   </ul>
 </div>
@@ -351,11 +322,26 @@ new Chart(ctx, {
 });
 
 function poll() {
+  console.log("[%s] Polling data ke server...", new Date().toLocaleTimeString());
+  
   fetch('{{ route("api.sensor.realtime") }}', {
     headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
   })
-  .then(r => r.json())
+  .then(r => {
+    if(!r.ok) {
+        throw new Error("HTTP Error! Status: " + r.status);
+    }
+    return r.json();
+  })
   .then(d => {
+    // Debugging: Lihat data mentah di Console
+    console.log("Data Diterima:", d);
+
+    if (Object.keys(d).length === 0) {
+        console.warn("Peringatan: Data diterima tapi kosong (Object Kosong). Pastikan ESP32 sudah mengirim data ke database.");
+        return;
+    }
+
     if (d.jarak_terdekat !== undefined) {
       document.getElementById('val-jarak').textContent    = Math.round(d.jarak_terdekat * 100) + ' cm';
       document.getElementById('val-terdekat').textContent = d.jarak_terdekat.toFixed(1);
@@ -369,12 +355,15 @@ function poll() {
     if (d.lng)           document.getElementById('val-lng').textContent       = d.lng;
     if (d.gps_status)    document.getElementById('val-gpsstatus').textContent = d.gps_status;
     if (d.arah)          document.getElementById('val-arah').textContent      = d.arah;
+    
     if (d.jarak_status) {
       const el = document.getElementById('val-status');
       el.textContent = d.jarak_status;
       el.className = 'badge ' + d.jarak_status.toLowerCase();
     }
+
     if (d.log_baru) {
+      console.log("Log Baru Terdeteksi:", d.log_baru);
       const list = document.getElementById('log-list');
       const now  = new Date().toTimeString().slice(0, 5);
       const li   = document.createElement('li');
@@ -383,8 +372,16 @@ function poll() {
       list.prepend(li);
       while (list.children.length > 10) list.removeChild(list.lastChild);
     }
-  }).catch(() => {});
+  })
+  .catch(err => {
+    console.error("KONEKSI GAGAL: Tidak bisa mengambil data dari server Laravel. Detail:", err.message);
+    console.info("Tips: Cek apakah server Laravel menyala atau URL API '" + '{{ route("api.sensor.realtime") }}' + "' sudah benar.");
+  });
 }
+
+// Jalankan polling setiap 4 detik
 setInterval(poll, 4000);
+// Jalankan sekali saat halaman pertama dibuka
+poll();
 </script>
 @endpush

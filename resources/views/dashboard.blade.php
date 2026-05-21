@@ -50,10 +50,7 @@
     font-size: 14px; font-weight: 700; color: var(--gray-800);
     margin-bottom: 14px;
   }
-  .sensor-panel-title svg {
-    width: 18px; height: 18px;
-    fill: var(--gray-800); stroke: none;
-  }
+  .sensor-panel-title svg { width: 18px; height: 18px; fill: var(--gray-800); stroke: none; }
   .sensor-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 0;
@@ -79,7 +76,6 @@
     transition: transform .25s;
   }
   .toggle input:checked + .toggle-slider.green-on  { background: var(--green-500); }
-  .toggle input:checked + .toggle-slider.red-on    { background: var(--red-500); }
   .toggle input:checked + .toggle-slider::before   { transform: translateX(24px); }
 
   /* status bar */
@@ -90,19 +86,13 @@
     margin-bottom: 16px;
     align-items: stretch;
   }
-  .status-card {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px;
-  }
+  .status-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
   .status-icon-wrap {
     width: 40px; height: 40px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .status-icon-wrap svg {
-    width: 22px; height: 22px;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  }
+  .status-icon-wrap svg { width: 22px; height: 22px; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .status-icon-wrap.green { background: #dcfce7; }
   .status-icon-wrap.green svg { stroke: var(--green-600); fill: none; }
   .status-icon-wrap.red   { background: #fee2e2; }
@@ -116,89 +106,106 @@
   .status-val.green  { color: var(--green-600); }
   .status-val.red    { color: var(--red-500); }
 
-  /* gps label in status bar */
-  .gps-label-card {
-    display: flex; align-items: center; gap: 8px;
-    padding: 14px 16px;
-    font-size: 14px; font-weight: 700; color: var(--gray-800);
-  }
-  .gps-label-card svg {
-    width: 20px; height: 20px;
-    stroke: var(--gray-700); fill: none;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  /* bottom grid */
-  .grid-bottom {
-    display: grid;
-    grid-template-columns: 1fr 260px;
-    gap: 18px;
-  }
-
-  /* camera */
-  .camera-title {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 700; color: var(--gray-800);
-    margin-bottom: 12px;
-  }
-  .camera-title svg {
-    width: 18px; height: 18px;
-    stroke: var(--gray-700); fill: none;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  }
+  /* Camera Viewport */
   .camera-viewport {
-    background: #111; border-radius: 10px;
+    background: #000; border-radius: 10px;
     aspect-ratio: 16/9; position: relative; overflow: hidden;
   }
+  #stream-wrap { width: 100%; height: 100%; display: none; }
+  #live-stream { width: 100%; height: 100%; object-fit: cover; }
+  
+  #offline-state {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #0a0a0a; gap: 10px; z-index: 5;
+  }
+
   .cam-overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; justify-content: space-between;
-    padding: 10px 14px;
+    padding: 10px 14px; z-index: 10; pointer-events: none;
   }
   .cam-top, .cam-bottom { display: flex; align-items: center; justify-content: space-between; }
   .rec-badge { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: white; letter-spacing: 1px; }
   .rec-dot { width: 8px; height: 8px; background: var(--red-500); border-radius: 50%; animation: blink 1.2s infinite; }
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:.2} }
-  .cam-crosshair {
-    width: 48px; height: 48px;
-    border: 1.5px solid rgba(255,255,255,.3); border-radius: 6px;
-    position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
-  }
-  .cam-plus { position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); color: rgba(255,255,255,.35); font-size: 18px; }
-  .cam-time { font-size: 11px; color: rgba(255,255,255,.7); font-variant-numeric: tabular-nums; }
-  .cam-fps  { font-size: 10px; color: rgba(255,255,255,.45); }
-  .cam-battery-icon svg { width: 16px; height: 16px; stroke: rgba(255,255,255,.6); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  
+  .stream-badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; color: white; }
+  .stream-badge.live { background: #22c55e; }
+  .stream-badge.offline { background: #ef4444; }
 
-  /* gps map */
-  .gps-map-wrap {
-    border-radius: 12px; overflow: hidden;
-    aspect-ratio: 1/.9; position: relative;
-    background: var(--gray-100);
+  .cam-time { font-size: 11px; color: rgba(255,255,255,.8); font-family: monospace; }
+  
+  .scan-line {
+    position: absolute; left: 0; right: 0; height: 1px; z-index: 8;
+    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
+    animation: scan 4s linear infinite; pointer-events: none;
   }
+  @keyframes scan { 0%{top:5%} 100%{top:95%} }
+
+  /* bottom grid */
+  .grid-bottom { display: grid; grid-template-columns: 1fr 260px; gap: 18px; }
+  .gps-map-wrap { border-radius: 12px; overflow: hidden; aspect-ratio: 1/.9; background: var(--gray-100); }
   .gps-map-wrap iframe { width:100%; height:100%; border:none; display:block; }
-  .gps-placeholder {
-    width:100%; height:100%;
-    background: linear-gradient(135deg,#dbeafe,#bbf7d0,#d1fae5);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-  }
-  .gps-placeholder svg { width:32px; height:32px; stroke:#16a34a; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-  .gps-placeholder-loc { font-size:12px; font-weight:700; color:var(--gray-600); }
-  .gps-placeholder-sub { font-size:10px; color:var(--gray-400); }
 
-  /* live pulse */
-  .live-pill {
-    display:inline-flex; align-items:center; gap:5px;
-    background:var(--green-500); color:white;
-    padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700;
-  }
-  .live-dot { width:6px;height:6px;background:white;border-radius:50%;animation:pulse 1.4s infinite; }
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  /* GPS Label Card Link */
+  /* GPS Label Card */
+.gps-label-card{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 22px; /* padding lebih lega */
+    border-radius: 24px;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Bagian kiri */
+.gps-title{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Icon maps */
+.gps-title i{
+    font-size: 22px;
+    color: #ef4444;
+}
+
+/* Text GPS */
+.gps-title span{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+/* Tombol Live */
+.config-link{
+    margin-left: auto;
+    font-size: 10px;
+
+    background: var(--gray-100);
+    padding: 8px 16px;
+
+    border-radius: 999px;
+    text-decoration: none;
+
+    color: var(--gray-700);
+    transition: all 0.2s ease;
+}
+
+.config-link:hover{
+    background: var(--gray-200);
+    color: var(--gray-900);
+}
 </style>
 @endpush
 
 @section('content')
 
-{{-- Greeting --}}
 <div class="greeting">
   <div class="greeting-title">
     @php
@@ -210,36 +217,23 @@
   <div class="greeting-sub">Welcome to Smart-Way Glasses dashboard</div>
 </div>
 
-{{-- TOP: Glasses hero + Sensor toggles --}}
 <div class="grid-top">
-
-  {{-- Glasses image --}}
   <div class="glasses-card">
-    <img class="glasses-hero"
-      src="{{ asset('images/glasses.png') }}"
-      alt="Smart-Way Glasses"
-      onerror="this.src='https://via.placeholder.com/280x160?text=Smart-Way+Glasses'">
+    <img class="glasses-hero" src="{{ asset('images/glasses.png') }}" alt="Smart-Way Glasses" onerror="this.src='https://via.placeholder.com/280x160?text=Smart-Way+Glasses'">
   </div>
 
-  {{-- Sensor toggles --}}
   <div class="card sensor-panel">
     <div class="sensor-panel-title">
-      {{-- Bar chart icon --}}
-      <svg viewBox="0 0 24 24">
-        <rect x="2"  y="14" width="4" height="8" rx="1"/>
-        <rect x="9"  y="9"  width="4" height="13" rx="1"/>
-        <rect x="16" y="4"  width="4" height="18" rx="1"/>
-      </svg>
-      Sensor
+      <svg viewBox="0 0 24 24"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="9" width="4" height="13" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg>
+      Sensor Control
     </div>
 
     @php
       $sensors = [
-        ['label'=>'GPS',      'on'=>true,  'color'=>'green-on'],
-        ['label'=>'Jarak',    'on'=>true,  'color'=>'green-on'],
-        ['label'=>'Kamera',   'on'=>true,  'color'=>'green-on'],
-        ['label'=>'Sensor A', 'on'=>true,  'color'=>'green-on'],
-        ['label'=>'Sensor B', 'on'=>true,  'color'=>'green-on'],
+        ['label'=>'GPS',      'on'=>false,  'var' => 'gps'],
+        ['label'=>'Jarak',    'on'=>false,  'var' => 'distance'],
+        ['label'=>'Kamera',   'on'=>false,  'var' => 'camera_power'],
+        ['label'=>'Flash',    'on'=>false, 'var' => 'flash'],
       ];
     @endphp
 
@@ -247,188 +241,206 @@
     <div class="sensor-row">
       <span class="sensor-row-label">{{ $s['label'] }}</span>
       <label class="toggle">
-        <input type="checkbox" {{ $s['on'] ? 'checked' : '' }}
-          onchange="updateSensor('{{ Str::slug($s['label']) }}', this.checked)">
-        <span class="toggle-slider {{ $s['color'] }}"></span>
+        <input type="checkbox" {{ $s['on'] ? 'checked' : '' }} onchange="updateSensor('{{ $s['var'] }}', this.checked)">
+        <span class="toggle-slider green-on"></span>
       </label>
     </div>
     @endforeach
   </div>
 </div>
 
-{{-- STATUS ROW --}}
 <div class="grid-status">
-
-  {{-- Battery --}}
   <div class="card status-card">
-    <div class="status-icon-wrap blue">
-    <svg viewBox="0 0 24 24" width="22" height="22"
-         fill="none" stroke="#3b82f6" stroke-width="1.8"
-         stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="6" width="18" height="12" rx="2" ry="2"/>
-        <line x1="23" y1="13" x2="23" y2="11"/>
-        <line x1="4" y1="9" x2="4" y2="15"/>
-        <line x1="7" y1="9" x2="7" y2="15"/>
-        <line x1="10" y1="9" x2="10" y2="15"/>
-    </svg>
+    <div class="status-icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg></div>
+    <div><div class="status-label">Battery</div></div>
+    <div class="status-val green" id="t-battery">{{ $device->battery_pct ?? 85 }}%</div>
+  </div>
+
+  <div class="card status-card">
+    <div class="status-icon-wrap green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><circle cx="12" cy="20" r="1"/></svg></div>
+    <div><div class="status-label">Wifi</div></div>
+    <div class="status-val green" id="wifi-status">Connected</div>
+  </div>
+
+  <div class="card status-card">
+    <div class="status-icon-wrap red" id="cam-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+    <div><div class="status-label">Camera</div></div>
+    <div class="status-val red" id="cam-status">Offline</div>
+  </div>
+
+  <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="card gps-label-card">
+    <div class="gps-title">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>GPS</span>
+    </div>
+
+    <a href="{{ route('control.center') }}" class="config-link">Live</a>
 </div>
-    <div>
-      <div class="status-label">Battery</div>
-      <div class="status-sub">{{ $device->battery_hours ?? 4 }}hour</div>
-    </div>
-    <div class="status-val green">{{ $device->battery_pct ?? 50 }}%</div>
-  </div>
-
-  {{-- Wifi --}}
-  <div class="card status-card">
-    <div class="status-icon-wrap green">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-        <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-        <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>
-      </svg>
-    </div>
-    <div>
-      <div class="status-label">Wifi</div>
-    </div>
-    <div class="status-val green" id="wifi-status">{{ $device->wifi ?? 'Connected' }}</div>
-  </div>
-
-  {{-- Camera --}}
-  <div class="card status-card">
-    <div class="status-icon-wrap red">
-      <svg viewBox="0 0 24 24">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
-    </div>
-    <div>
-      <div class="status-label">Camera</div>
-    </div>
-    <div class="status-val red" id="cam-status">{{ $device->camera ?? 'Error' }}</div>
-  </div>
-
-  {{-- GPS label --}}
-  <div class="card gps-label-card">
-    <svg viewBox="0 0 24 24">
-      <path d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6z"/>
-      <circle cx="12" cy="8" r="2.5" fill="currentColor" stroke="none"/>
-    </svg>
-    GPS Location
-    <span class="live-pill" style="margin-left:auto"><span class="live-dot"></span>Live</span>
-  </div>
-
 </div>
 
-{{-- BOTTOM: Camera feed + GPS map --}}
 <div class="grid-bottom">
-
-  {{-- Camera feed --}}
   <div class="card">
-    <div class="camera-title">
-      <svg viewBox="0 0 24 24">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
-      Camera
-    </div>
+    <div class="camera-title" style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--gray-800);">Live Feed</div>
     <div class="camera-viewport">
+      <div class="scan-line"></div>
+      <div id="stream-wrap"><img id="live-stream" src=""></div>
+      <div id="offline-state">
+        <span style="font-size:20px; opacity:0.3">📷</span>
+        <span id="offline-msg" style="font-size:10px; color:rgba(255,255,255,0.4); font-weight:700;">CAMERA POWERED OFF</span>
+      </div>
       <div class="cam-overlay">
         <div class="cam-top">
           <div class="rec-badge"><span class="rec-dot"></span> REC</div>
-          <div class="cam-battery-icon">
-            <svg viewBox="0 0 24 24">
-              <rect x="2" y="7" width="16" height="10" rx="2"/>
-              <path d="M22 11v2"/>
-            </svg>
-          </div>
+          <span class="stream-badge offline" id="stream-badge">OFFLINE</span>
         </div>
-        <div class="cam-crosshair"></div>
-        <div class="cam-plus">+</div>
         <div class="cam-bottom">
-          <div class="cam-time" id="cam-timer">00:00:00</div>
-          <div class="cam-fps">30 FPS | 4K</div>
+          <div class="cam-time" id="cam-timer">00:00:00:00</div>
+          <div class="cam-fps">30 FPS | HD</div>
         </div>
       </div>
     </div>
   </div>
 
-  {{-- GPS map --}}
-  <div class="card" style="padding:18px 18px 14px;">
-    <div class="gps-map-wrap">
-      @if(config('services.google_maps.key'))
-        <iframe
-          src="https://www.google.com/maps?q={{ $gps->latitude ?? -7.9525 }},{{ $gps->longitude ?? 112.6144 }}&z=15&output=embed"
-          loading="lazy" allowfullscreen>
-        </iframe>
-      @else
-        <div class="gps-placeholder">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6z"/>
-            <circle cx="12" cy="8" r="2.5" fill="#16a34a" stroke="none"/>
-          </svg>
-          <div class="gps-placeholder-loc">Universitas Brawijaya</div>
-          <div class="gps-placeholder-sub">-7.9525 , 112.6144</div>
-          <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Tambahkan GOOGLE_MAPS_KEY di .env</div>
-        </div>
-      @endif
-    </div>
-    <div style="display:flex;gap:8px;margin-top:10px;">
-      <div style="flex:1;background:var(--gray-50);border-radius:8px;padding:7px 10px;">
-        <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;">Lat</div>
-        <div style="font-size:12px;font-weight:700;color:var(--gray-700);">{{ $gps->latitude ?? '-7.9525' }}°</div>
+  <div class="card" style="padding:10px 10px 0px;">
+      <div class="gps-map-wrap">
+          <iframe
+              id="gps-frame"
+              src="https://www.google.com/maps?q={{ $lat }},{{ $lng }}&z={{ $zoom }}&output=embed"
+              allowfullscreen=""
+              loading="lazy">
+          </iframe>
       </div>
-      <div style="flex:1;background:var(--gray-50);border-radius:8px;padding:7px 10px;">
-        <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;">Lng</div>
-        <div style="font-size:12px;font-weight:700;color:var(--gray-700);">{{ $gps->longitude ?? '112.6144' }}°</div>
-      </div>
-      <div style="flex:1;background:var(--gray-50);border-radius:8px;padding:7px 10px;">
-        <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;">Akurasi</div>
-        <div style="font-size:12px;font-weight:700;color:var(--gray-700);">±{{ $gps->akurasi ?? 3 }}m</div>
-      </div>
-    </div>
   </div>
-
 </div>
 @endsection
 
 @push('scripts')
 <script>
-// Camera timer
-let sec = 0;
-setInterval(() => {
-  sec++;
-  const h = String(Math.floor(sec/3600)).padStart(2,'0');
-  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-  const s = String(sec%60).padStart(2,'0');
-  document.getElementById('cam-timer').textContent = `${h}:${m}:${s}`;
-}, 1000);
+// ===============================
+// GPS REALTIME DASHBOARD
+// ===============================
 
-// Toggle sensor via AJAX
+async function updateRealtimeGPS() {
+
+    try {
+
+        const response = await fetch('/api/gps/realtime');
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            const lat = parseFloat(data.latitude);
+            const lng = parseFloat(data.longitude);
+
+            // update iframe maps
+            const mapFrame = document.getElementById('gps-frame');
+
+            mapFrame.src =
+                `https://www.google.com/maps?q=${lat},${lng}&z=18&output=embed`;
+
+        }
+
+    } catch (err) {
+
+        console.log("GPS DASHBOARD ERROR:", err);
+
+    }
+
+}
+
+// refresh tiap 3 detik
+setInterval(updateRealtimeGPS, 3000);
+
+const camStreamURL = @json(config('esp32.cam_url', ''));
+const camBaseURL   = @json(config('esp32.cam_base', ''));
+let kameraAktif = true; 
+
+// Timer Frame Jam
+let frames = 0;
+setInterval(() => {
+  frames++;
+  const ts = Math.floor(frames / 30);
+  const ff = frames % 30;
+  const ss = ts % 60, mm = Math.floor(ts/60)%60, hh = Math.floor(ts/3600);
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('cam-timer').textContent = `${p(hh)}:${p(mm)}:${p(ss)}:${p(ff)}`;
+}, 1000/30);
+
+function muatStream(url) {
+  if (!url || !kameraAktif) return;
+  const img = document.getElementById('live-stream');
+  const wrap = document.getElementById('stream-wrap');
+  const offline = document.getElementById('offline-state');
+  const badge = document.getElementById('stream-badge');
+  const statusVal = document.getElementById('cam-status');
+
+  img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+  img.onload = function() {
+    wrap.style.display = 'block';
+    offline.style.display = 'none';
+    badge.textContent = 'LIVE';
+    badge.className = 'stream-badge live';
+    statusVal.textContent = 'Online';
+    statusVal.className = 'status-val green';
+  };
+
+  img.onerror = function() {
+    if(kameraAktif) {
+        statusVal.textContent = 'Error';
+        badge.textContent = 'ERR';
+    }
+  };
+}
+
+function matikanStream() {
+  const img = document.getElementById('live-stream');
+  const wrap = document.getElementById('stream-wrap');
+  const offline = document.getElementById('offline-state');
+  const badge = document.getElementById('stream-badge');
+  const statusVal = document.getElementById('cam-status');
+  const msg = document.getElementById('offline-msg');
+
+  img.src = ""; 
+  wrap.style.display = 'none';
+  offline.style.display = 'flex';
+  msg.textContent = "CAMERA POWERED OFF";
+  badge.textContent = 'OFFLINE';
+  badge.className = 'stream-badge offline';
+  statusVal.textContent = 'Offline';
+  statusVal.className = 'status-val red';
+}
+
 function updateSensor(name, val) {
+  if (name === 'camera_power') {
+    kameraAktif = val;
+    if (val) {
+        muatStream(camStreamURL);
+    } else {
+        matikanStream();
+    }
+  }
+
+  // Kirim Status ke Backend Laravel
   fetch('{{ route("api.sensor.toggle") }}', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
     body: JSON.stringify({ sensor: name, value: val })
-  }).catch(console.warn);
+  });
+
+  // Kirim instruksi langsung ke ESP32 (Jika ada)
+  if (camBaseURL) {
+    let espVar = name === 'camera_power' ? 'power' : name;
+    fetch(`${camBaseURL}/control?var=${espVar}&val=${val ? 1 : 0}`, { mode: 'no-cors' });
+  }
 }
 
-// Realtime polling setiap 5 detik
-function pollStatus() {
-  fetch('{{ route("api.device.status") }}', {
-    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.wifi)   document.getElementById('wifi-status').textContent = d.wifi;
-    if (d.camera) document.getElementById('cam-status').textContent  = d.camera;
-  })
-  .catch(console.warn);
-}
-setInterval(pollStatus, 5000);
+document.addEventListener('DOMContentLoaded', () => {
+  if (camStreamURL) muatStream(camStreamURL);
+});
 </script>
 @endpush

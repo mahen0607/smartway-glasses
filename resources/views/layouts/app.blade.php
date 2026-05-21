@@ -40,6 +40,119 @@
 
     .app { display: flex; min-height: 100vh; }
 
+/* Container untuk tombol aksi di kanan navbar */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Tombol Notifikasi */
+.nav-icon-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #64748b;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+}
+
+.nav-icon-btn:hover {
+    background: #f0fdf4;
+    color: #22c55e;
+    border-color: #bbf7d0;
+    transform: translateY(-2px);
+}
+
+/* Titik Notifikasi Merah */
+.badge-dot {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* Animasi Berdenyut (Pulse) */
+.badge-pulse {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1.5); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Dropdown User Profile */
+.user-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 40px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.user-dropdown-btn:hover {
+    background: #f8fafc;
+    border-color: #22c55e;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Lingkaran Inisial Nama */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.user-role {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
     /* ── SIDEBAR ── */
     .sidebar {
       width: var(--sw);
